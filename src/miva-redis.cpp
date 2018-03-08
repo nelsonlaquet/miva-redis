@@ -34,7 +34,7 @@ extern "C" {
 
 		_connection = redisConnect(host, port);
 		if (_connection != NULL && _connection->errstr) {
-			mvProgram_FatalError(program, _connection->errstr, strlen(_connection->errstr));
+			mvProgram_FatalError(program, "TEST", strlen("TEST"));
 			mvVariable_SetValue_Integer(returnValue, 0);
 			return;
 		}
