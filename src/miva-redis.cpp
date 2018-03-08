@@ -44,7 +44,7 @@ extern "C" {
 
 	void redis_free(mvProgram program, mvVariableHash parameters, mvVariable returnValue, void** pdata)  {
 		if (_connection != NULL) {
-			redis_free(_connection);		
+			redisFree(_connection);		
 			_connection = NULL;
 		}
 
