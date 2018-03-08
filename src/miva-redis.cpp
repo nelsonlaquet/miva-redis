@@ -13,6 +13,8 @@ extern "C" {
 	* Function Parameter Data Structures
 	*/
 	MV_EL_FunctionParameter redis_connect_parameters[] = {
+		{ "host", 4, EPF_NORMAL },
+		{ "port", 4, EPF_NORMAL },
 	};
 
 	MV_EL_FunctionParameter redis_free_parameters[] = {
