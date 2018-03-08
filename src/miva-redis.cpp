@@ -22,7 +22,7 @@ extern "C" {
 
 	void redis_connect(mvProgram program, mvVariableHash parameters, mvVariable returnValue, void** pdata)  {
 		if (_connection != NULL) {
-			const char* error = "";
+			const char* error = "Already Connected!";
 			mvProgram_FatalError(program, error, strlen(error));
 			mvVariable_SetValue_Integer(returnValue, 0);
 			return;
