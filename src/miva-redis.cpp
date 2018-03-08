@@ -64,7 +64,7 @@ extern "C" {
 		}
 
 		int commandLength = 0;
-		const char* command = mvVariable_Value(mvVariableHash_Index(parameters, 0), &inputLength);
+		const char* command = mvVariable_Value(mvVariableHash_Index(parameters, 0), &commandLength);
 		redisCommand(_connection, command);
 		mvVariable_SetValue_Integer(returnValue, 1);
 	}
