@@ -73,7 +73,7 @@ extern "C" {
 		static MV_EL_Function exported_functions[] = {
 			{ "redis_connect", 13, 2, redis_connect_parameters, redis_connect },
 			{ "redis_free", 10, 0, redis_free_parameters, redis_free },
-			{ "redis_command", 13, 0, redis_command_parameters, redis_command },
+			{ "redis_command", 13, 1, redis_command_parameters, redis_command },
 			{ 0 , 0 , 0, 0 , 0 }
 		};
 
