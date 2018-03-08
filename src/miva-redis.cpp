@@ -99,7 +99,6 @@ extern "C" {
 		
 		formatRedisReply(reply, returnValue);
 		freeReplyObject(reply);
-		mvVariable_SetValue_Integer(returnValue, 1);
 	}
 
 	EXPORT MV_EL_Function_List* miva_function_table() {
