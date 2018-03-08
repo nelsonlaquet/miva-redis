@@ -13,14 +13,17 @@ extern "C" {
 	* Helpers
 	*/
 	void formatRedisReply(redisReply* reply, mvVariable outputVar) {
-		if (reply->type == REDIS_REPLY_STATUS) {
-			mvVariable_SetValue(outputVar, reply->str, reply->len);
+		mvVariable statusVar = mvVariable_Allocate("type", 4, "", 0);
+		mvVariable_SetValue_Integer(statusVar, reply->type);
+		mvVariable_Set_Struct_Member("type", 4, statusVar, outputVar);
+
+		if (reply->type == REDIS_REPLY_STATUS || reply->type == REDIS_REPLY_STRING || reply->type == REDIS_REPLY_ERROR) {
+			mvVariable stringVar = mvVariable_Allocate("string", 6, reply->str, reply->len);
+			mvVariable_Set_Struct_Member("string", 6, stringVar, outputVar);
 		} else if (reply->type == REDIS_REPLY_INTEGER) {
-			mvVariable_SetValue_Integer(outputVar, reply->integer);
-		} else if (reply->type == REDIS_REPLY_NIL) {
-			// do nothing...
-		} else if (reply->type == REDIS_REPLY_STRING) {
-			mvVariable_SetValue(outputVar, reply->str, reply->len);
+			mvVariable intVar = mvVariable_Allocate("string", 6, reply->str, reply->len);
+			mvVariable_SetValue_Integer(intVar, reply->integer);
+			mvVariable_Set_Struct_Member("string", 6, intVar, outputVar);			
 		} else if (reply->type == REDIS_REPLY_ARRAY) {
 			const char* varName = "redisreply";
 			for (int i = 0; i < reply->elements; i++) {
@@ -28,8 +31,6 @@ extern "C" {
 				formatRedisReply(reply->element[i], arrVar);
 				mvVariable_Set_Array_Element(i, outputVar, arrVar);
 			}
-		} else if (reply->type == REDIS_REPLY_ERROR) {
-			mvVariable_SetValue(outputVar, reply->str, reply->len);
 		}
 	}
 
