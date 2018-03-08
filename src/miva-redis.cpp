@@ -32,8 +32,8 @@ extern "C" {
 			return;
 		}
 		
-		int inputLength = 0;
-		const char* host = mvVariable_Value(mvVariableHash_Index(parameters, 0), &inputLength);
+		int hostLength = 0;
+		const char* host = mvVariable_Value(mvVariableHash_Index(parameters, 0), &hostLength);
 		int port = mvVariable_Value_Integer(mvVariableHash_Index(parameters, 1));
 
 		_connection = redisConnect(host, port);
@@ -63,6 +63,7 @@ extern "C" {
 			return;
 		}
 
+		int commandLength = 0;
 		const char* command = mvVariable_Value(mvVariableHash_Index(parameters, 0), &inputLength);
 		redisCommand(_connection, command);
 		mvVariable_SetValue_Integer(returnValue, 1);
