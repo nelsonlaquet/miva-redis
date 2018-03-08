@@ -29,7 +29,7 @@ extern "C" {
 				mvVariable_Set_Array_Element(i, outputVar, arrVar);
 			}
 		} else if (reply->type == REDIS_REPLY_ERROR) {
-			mvVariable_Set_Struct_Member()
+			mvVariable_SetValue(outputVar, reply->str, reply->len);
 		}
 	}
 
