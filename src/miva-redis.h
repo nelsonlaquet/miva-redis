@@ -11,17 +11,11 @@
 	#define EXPORT 
 #endif
 
-#ifdef __cplusplus
 extern "C" {
-#endif
+	void my_bi_function(mvProgram prog, mvVariableHash parameters, mvVariable returnvalue, void ** pdata);
+	void my_bi_function2(mvProgram prog, mvVariableHash parameters, mvVariable returnvalue, void ** pdata);
 
-void my_bi_function(mvProgram prog, mvVariableHash parameters, mvVariable returnvalue, void ** pdata);
-void my_bi_function2(mvProgram prog, mvVariableHash parameters, mvVariable returnvalue, void ** pdata);
-
-EXPORT MV_EL_Function_List *miva_function_table();
-
-#ifdef __cplusplus
+	EXPORT MV_EL_Function_List *miva_function_table();
 }
-#endif
 
 #endif
