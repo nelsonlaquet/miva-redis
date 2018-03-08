@@ -33,8 +33,8 @@ extern "C" {
 		int port = mvVariable_Value_Integer(mvVariableHash_Index(parameters, 1));
 
 		_connection = redisConnect(host, port);
-		if (_connection != NULL && _connection->errstr) {
-			mvProgram_FatalError(program, "TEST", strlen("TEST"));
+		if (_connection != NULL && _connection->err) {
+			mvProgram_FatalError(program, _connection->errstr, strlen(_connection->errstr));
 			mvVariable_SetValue_Integer(returnValue, 0);
 			return;
 		}
