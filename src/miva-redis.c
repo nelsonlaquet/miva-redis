@@ -18,7 +18,7 @@ MV_EL_FunctionParameter my_bi_function2_parameters[] = {
 
 void my_bi_function(mvProgram prog, mvVariableHash parameters, mvVariable returnvalue, void ** pdata) 
 {
-	mvVariable_SetValue_Integer( returnvalue, 5 );
+	mvVariable_SetValue_Integer( returnvalue, 42 );
 }
 
 void my_bi_function2(mvProgram prog, mvVariableHash parameters, mvVariable returnvalue, void ** pdata) 
