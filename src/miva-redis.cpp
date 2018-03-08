@@ -19,23 +19,23 @@ extern "C" {
 	};
 
 	void redis_connect(mvProgram program, mvVariableHash parameters, mvVariable returnValue, void** pdata)  {
-		if (_connection != NULL) {
-			const char* error = "";
-			mvProgram_FatalError(program, error, strlen(error));
-			mvVariable_SetValue_Integer(returnValue, 0);
-			return;
-		}
+		// if (_connection != NULL) {
+		// 	const char* error = "";
+		// 	mvProgram_FatalError(program, error, strlen(error));
+		// 	mvVariable_SetValue_Integer(returnValue, 0);
+		// 	return;
+		// }
 		
-		int inputLength = 0;
-		const char* host = mvVariable_Value(mvVariableHash_Index(parameters, 0), &inputLength);
-		int port = mvVariable_Value_Integer(mvVariableHash_Index(parameters, 1));
+		// int inputLength = 0;
+		// const char* host = mvVariable_Value(mvVariableHash_Index(parameters, 0), &inputLength);
+		// int port = mvVariable_Value_Integer(mvVariableHash_Index(parameters, 1));
 
-		_connection = redisConnect(host, port);
-		if (_connection != NULL && _connection->errstr) {
-			mvProgram_FatalError(program, _connection->errstr, strlen(_connection->errstr));
-			mvVariable_SetValue_Integer(returnValue, 0);
-			return;
-		}
+		// _connection = redisConnect(host, port);
+		// if (_connection != NULL && _connection->errstr) {
+		// 	mvProgram_FatalError(program, _connection->errstr, strlen(_connection->errstr));
+		// 	mvVariable_SetValue_Integer(returnValue, 0);
+		// 	return;
+		// }
 
 		mvVariable_SetValue_Integer(returnValue, 1);
 	}
