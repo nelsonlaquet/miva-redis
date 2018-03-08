@@ -7,7 +7,7 @@ extern "C" {
 	/**
 	* Globals
 	*/
-	redisContext* _connection = nullptr;
+	redisContext* _connection = NULL;
 
 	/**
 	* Function Parameter Data Structures
@@ -19,7 +19,7 @@ extern "C" {
 	};
 
 	void redis_connect(mvProgram program, mvVariableHash parameters, mvVariable returnValue, void** pdata)  {
-		if (_connection != nullptr) {
+		if (_connection != NULL) {
 			const char* error = "";
 			mvProgram_FatalError(program, error, strlen(error));
 			mvVariable_SetValue_Integer(returnValue, 0);
