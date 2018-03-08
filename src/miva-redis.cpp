@@ -65,8 +65,37 @@ extern "C" {
 
 		int commandLength = 0;
 		const char* command = mvVariable_Value(mvVariableHash_Index(parameters, 0), &commandLength);
-		redisCommand(_connection, command);
+		redisReply* reply = redisCommand(_connection, command);
+		if (reply == NULL) {
+			mvProgram_FatalError(program, _connection->errstr, strlen(_connection->errstr));
+			mvVariable_SetValue_Integer(returnValue, 0);
+			return;
+		}
+		
+		formatRedisReply(reply, returnValue);
+		freeReplyObject(reply);
 		mvVariable_SetValue_Integer(returnValue, 1);
+	}
+
+	void formatRedisReply(redisReply* reply, mvVariable outputVar) {
+		if (reply->type == REDIS_REPLY_STATUS) {
+			mvVariable_SetValue(outputVar, reply->str, reply->len);
+		} else if (reply->type == REDIS_REPLY_INTEGER) {
+			mvVariable_SetValue_Integer(outputVar, reply->int_value);
+		} else if (reply->type == REDIS_REPLY_NIL) {
+			// do nothing...
+		} else if (reply->type == REDIS_REPLY_STRING) {
+			mvVariable_SetValue(outputVar, reply->str, reply->len);
+		} else if (reply->type == REDIS_REPLY_ARRAY) {
+			const char* varName = "redisreply";
+			for (int i = 0; i < reply->elements; i++) {
+				mvVariable arrVar = mvVariable_Allocate(varName, strlen(varName), "", 0);
+				formatRedisReply(reply->element[i], arrVar);
+				mvVariable_Set_Array_Element(i, outputVar, arrVar);
+			}
+		} else if (reply->type == REDIS_REPLY_ERROR) {
+			mvVariable_Set_Struct_Member()
+		}
 	}
 
 	EXPORT MV_EL_Function_List* miva_function_table() {
