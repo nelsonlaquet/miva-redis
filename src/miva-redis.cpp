@@ -13,9 +13,9 @@ extern "C" {
 	* Helpers
 	*/
 	void formatRedisReply(redisReply* reply, mvVariable outputVar) {
-		mvVariable statusVar = mvVariable_Allocate("type", 4, "", 0);
-		mvVariable_SetValue_Integer(statusVar, reply->type);
-		mvVariable_Set_Struct_Member("type", 4, statusVar, outputVar);
+		mvVariable typeVar = mvVariable_Allocate("type", 4, "", 0);
+		mvVariable_SetValue_Integer(typeVar, reply->type);
+		mvVariable_Set_Struct_Member("type", 4, typeVar, outputVar);
 
 		if (reply->type == REDIS_REPLY_STATUS || reply->type == REDIS_REPLY_STRING || reply->type == REDIS_REPLY_ERROR) {
 			mvVariable stringVar = mvVariable_Allocate("string", 6, reply->str, reply->len);
@@ -38,7 +38,6 @@ extern "C" {
 		{ "host", 4, EPF_NORMAL },
 		{ "port", 4, EPF_NORMAL }
 	};
-
 	void redis_connect(mvProgram program, mvVariableHash parameters, mvVariable returnValue, void** pdata)  {
 		if (_connection != NULL) {
 			const char* error = "Already Connected!";
