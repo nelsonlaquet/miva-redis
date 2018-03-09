@@ -34,19 +34,9 @@ extern "C" {
 		}
 	}
 
-	/**
-	* Function Parameter Data Structures
-	*/
 	MV_EL_FunctionParameter redis_connect_parameters[] = {
 		{ "host", 4, EPF_NORMAL },
 		{ "port", 4, EPF_NORMAL }
-	};
-
-	MV_EL_FunctionParameter redis_free_parameters[] = {
-	};
-
-	MV_EL_FunctionParameter redis_command_parameters[] = {
-		{ "command", 7, EPF_NORMAL }
 	};
 
 	void redis_connect(mvProgram program, mvVariableHash parameters, mvVariable returnValue, void** pdata)  {
@@ -71,6 +61,8 @@ extern "C" {
 		mvVariable_SetValue_Integer(returnValue, 1);
 	}
 
+	MV_EL_FunctionParameter redis_free_parameters[] = {
+	};
 	void redis_free(mvProgram program, mvVariableHash parameters, mvVariable returnValue, void** pdata)  {
 		if (_connection != NULL) {
 			redisFree(_connection);		
@@ -80,6 +72,9 @@ extern "C" {
 		mvVariable_SetValue_Integer(returnValue, 1);
 	}
 
+	MV_EL_FunctionParameter redis_command_parameters[] = {
+		{ "command", 7, EPF_NORMAL }
+	};
 	void redis_command(mvProgram program, mvVariableHash parameters, mvVariable returnValue, void** pdata) {
 		if (_connection == NULL) {
 			const char* error = "Not connected! Use redis_connect!";
@@ -101,11 +96,18 @@ extern "C" {
 		freeReplyObject(reply);
 	}
 
+	MV_EL_FunctionParameter test_func_parameters[] = {
+	};
+	void test_func(mvProgram program, mvVariableHash parameters, mvVariable returnValue, void** pdata) {
+		mvVariable_SetValue_Integer(returnValue, 42);
+	}
+
 	EXPORT MV_EL_Function_List* miva_function_table() {
 		static MV_EL_Function exported_functions[] = {
 			{ "redis_connect", 13, 2, redis_connect_parameters, redis_connect },
 			{ "redis_free", 10, 0, redis_free_parameters, redis_free },
 			{ "redis_command", 13, 1, redis_command_parameters, redis_command },
+			{ "test_func", 9, 0, test_func_parameters, test_func },
 			{ 0 , 0 , 0, 0 , 0 }
 		};
 

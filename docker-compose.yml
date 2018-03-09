@@ -1,0 +1,38 @@
+version: "3.5"
+services:
+  cpp-compiler:
+    build:
+      context: .
+      dockerfile: ./containers/cpp-compiler/Dockerfile
+    volumes:
+      - ./src:/miva-redis
+      - ./data/builtins:/builtins
+      
+  miva-compiler:
+    build:
+      context: .
+      dockerfile: ./containers/miva-compiler/Dockerfile
+    volumes:
+      - ./wwwroot:/wwwroot
+      - ./data/builtins:/builtins
+
+  miva:
+    build:
+      context: .
+      dockerfile: ./containers/miva-empresa/Dockerfile
+    restart: always
+    ports:
+      - "8080:80"
+    volumes:
+      - ./wwwroot:/usr/local/apache2/htdocs
+      - ./data/builtins:/builtins
+    depends_on:
+      - redis
+
+  redis:
+    build:
+      context: .
+      dockerfile: ./containers/redis/Dockerfile
+    restart: always
+    ports:
+      - "6379:6379"

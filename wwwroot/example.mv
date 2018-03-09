@@ -1,0 +1,16 @@
+<MvAssign name="l.ret" value="{redis_connect('redis', 6379)}" />
+<MvEval expr="{l.ret}" /> <br />
+
+<MvAssign name="l.ret" value="{redis_command('SET test WHOA')}" />
+<MvEval expr="{l.ret}" /> <br />
+
+<MvAssign name="l.ret" value="{redis_command('SET test2 EHY')}" />
+<MvEval expr="{l.ret}" /> <br />
+
+<MvAssign name="l.ret" value="{redis_command('GET test2')}" />
+<MvEval expr="{l.ret}" /> <br />
+
+<MvAssign name="l.ret" value="{redis_free()}" />
+<MvEval expr="{l.ret}" /> <br />
+
+<MvEval expr="{test_func()}" />

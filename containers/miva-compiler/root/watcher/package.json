@@ -1,0 +1,18 @@
+{
+  "name": "watcher",
+  "version": "0.0.1",
+  "description": "Basic watcher for the miva compiler",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nelsonlaquet/miva-redis.git"
+  },
+  "scripts": {
+    "start": "gulp watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "^4.0.0"
+  }
+}
