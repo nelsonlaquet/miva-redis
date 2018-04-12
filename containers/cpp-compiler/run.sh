@@ -1,1 +1,0 @@
-nodemon --exec "make && cp ./bin/miva-redis.so /builtins/" -e cpp -L

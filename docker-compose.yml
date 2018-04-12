@@ -4,9 +4,12 @@ services:
     build:
       context: .
       dockerfile: ./containers/cpp-compiler/Dockerfile
+    restart: always
     volumes:
-      - ./src:/miva-redis
-      - ./data/builtins:/builtins
+      - ./src:/packages/miva-redis
+      - ./data/builtins:/data/builtins
+    environment:
+      PROJECT_DIRS: "/packages/miva-redis->/data/builtins"
       
   miva-compiler:
     build:

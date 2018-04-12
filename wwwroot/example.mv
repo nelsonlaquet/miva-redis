@@ -1,16 +1,16 @@
+<h1>Redis Test</h1>
 <MvAssign name="l.ret" value="{redis_connect('redis', 6379)}" />
 <MvEval expr="{l.ret}" /> <br />
 
-<MvAssign name="l.ret" value="{redis_command('SET test WHOA')}" />
-<MvEval expr="{l.ret}" /> <br />
-
-<MvAssign name="l.ret" value="{redis_command('SET test2 EHY')}" />
-<MvEval expr="{l.ret}" /> <br />
-
-<MvAssign name="l.ret" value="{redis_command('GET test2')}" />
-<MvEval expr="{l.ret}" /> <br />
+<MvAssign name="l.toAppend" value="APPENDED! " />
+<MvAssign name="l.key" value="key2" />
+<h1><MvEval expr="{redis_command('DEL %s', 'l.key')}" /></h1>
+<h1><MvEval expr="{redis_command('APPEND %s %s', 'l.key, l.toAppend')}" /></h1>
+<h1><MvEval expr="{redis_command('APPEND %s %s', 'l.key, l.toAppend')}" /></h1>
+<h1><MvEval expr="{redis_command('APPEND %s %s', 'l.key, l.toAppend')}" /></h1>
+<h1><MvEval expr="{redis_command('APPEND %s %s', 'l.key, l.toAppend')}" /></h1>
+<h1><MvEval expr="{redis_command('APPEND %s %s', 'l.key, l.toAppend')}" /></h1>
+<h1><MvEval expr="{redis_command('GET %s', 'l.key')}" /></h1>
 
 <MvAssign name="l.ret" value="{redis_free()}" />
 <MvEval expr="{l.ret}" /> <br />
-
-<MvEval expr="{test_func()}" />
