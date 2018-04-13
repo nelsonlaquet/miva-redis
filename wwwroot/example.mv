@@ -4,6 +4,9 @@
 
 <MvAssign name="l.key" value="THEKEYTHING" />
 
+<h1>TEST GET: <MvEval expr="{miva_array_serialize(redis_get('DOESNTEXIST', l.blugh))}" /></h1>
+<h1>TEST GET CMD: <MvEval expr="{miva_array_serialize(redis_command('GET DOESNTEXIST', ''))}" /></h1>
+
 <h1>DEL: <MvEval expr="{miva_array_serialize(redis_del(l.key))}" /></h1>
 
 <MvIf expr="{redis_error(l.lastRedisError)}"><h1 style="color: red"><MvEval expr="{l.lastRedisError}" /></h1></MvIf>

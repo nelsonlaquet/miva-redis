@@ -331,6 +331,11 @@ extern "C" {
 			return;
 		}
 
+		if (reply->type == REDIS_REPLY_NIL) {
+			mvVariable_SetValue_Integer(returnValue, -1);
+			return;
+		}
+
 		if (reply->type != REDIS_REPLY_STRING) {
 			setRedisError(ERROR_COMMAND, "Redis did not return with the proper type REDIS_REPLY_STRING", program, returnValue);
 			freeReplyObject(reply);
@@ -496,7 +501,7 @@ extern "C" {
 
 			{ "redis_get", 9, 2, redis_get_parameters, redis_get},
 			{ "redis_set", 9, 2, redis_set_parameters, redis_set},
-			{ "redis_setex", 9, 2, redis_setex_parameters, redis_setex},
+			{ "redis_setex", 9, 3, redis_setex_parameters, redis_setex},
 			{ "redis_del", 9, 1, redis_del_parameters, redis_del},
 			{ "redis_append", 12, 2, redis_append_parameters, redis_append},
 
