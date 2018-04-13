@@ -19,8 +19,18 @@ gulp.task("watch", () => {
 			return acc
 		}, {})
 
-	return gulp.watch(Object.keys(projects).map(dir => `${dir}/**/*.cpp`), {usePolling: true})
+	return gulp.watch(Object.keys(projects).map(dir => `${dir}/**/*`), {usePolling: true})
 		.on("change", path => {
+			if (path.endsWith(".g.cpp")) {
+				// we don't want to trigger a build on generated files, since that would cause a loop...
+				return
+			}
+
+			if (!path.endsWith(".cpp") && !path.endsWith(".g.cpp.js")) {
+				// if the changed file is NOT a C++ source file OR a JS file that outputs a C++ source file, then don't rebuild
+				return
+			}
+			
 			// find which project this file was changed from...
 			const project = projects[reduceOwn(projects, (acc, projectPath) => acc || (path.startsWith(projectPath) ? projectPath : null))]
 			if (project == null) {

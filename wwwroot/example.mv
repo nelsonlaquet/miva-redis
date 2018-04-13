@@ -2,15 +2,55 @@
 <MvAssign name="l.ret" value="{redis_connect('redis', 6379)}" />
 <MvEval expr="{l.ret}" /> <br />
 
+<MvAssign name="l.key" value="THEKEYTHING" />
+
+<h1>DEL: <MvEval expr="{miva_array_serialize(redis_del(l.key))}" /></h1>
+
+<MvIf expr="{redis_error(l.lastRedisError)}"><h1 style="color: red"><MvEval expr="{l.lastRedisError}" /></h1></MvIf>
+<MvAssign name="l.startingValue" value="he234y" />
+<h1>SET: <MvEval expr="{miva_array_serialize(redis_set(l.key, l.startingValue))}" /></h1>
+
+<h1>GET: <MvEval expr="{miva_array_serialize(redis_get(l.key, l.gottenValue))}" /></h1>
+<h2>GOTTEN VALUE: <MvEval expr="{l.gottenValue}" /></h2>
+
+<MvIf expr="{redis_error(l.lastRedisError)}"><h1 style="color: red"><MvEval expr="{l.lastRedisError}" /></h1></MvIf>
 <MvAssign name="l.toAppend" value="APPENDED! " />
-<MvAssign name="l.key" value="key2" />
-<h1><MvEval expr="{redis_command('DEL %s', 'l.key')}" /></h1>
-<h1><MvEval expr="{redis_command('APPEND %s %s', 'l.key, l.toAppend')}" /></h1>
-<h1><MvEval expr="{redis_command('APPEND %s %s', 'l.key, l.toAppend')}" /></h1>
-<h1><MvEval expr="{redis_command('APPEND %s %s', 'l.key, l.toAppend')}" /></h1>
-<h1><MvEval expr="{redis_command('APPEND %s %s', 'l.key, l.toAppend')}" /></h1>
-<h1><MvEval expr="{redis_command('APPEND %s %s', 'l.key, l.toAppend')}" /></h1>
-<h1><MvEval expr="{redis_command('GET %s', 'l.key')}" /></h1>
+<h1>APPEND: <MvEval expr="{miva_array_serialize(redis_append(l.key, l.toAppend))}" /></h1>
+
+<MvIf expr="{redis_error(l.lastRedisError)}"><h1 style="color: red"><MvEval expr="{l.lastRedisError}" /></h1></MvIf>
+
+<h1>APPEND: <MvEval expr="{miva_array_serialize(redis_append(l.key, l.toAppend))}" /></h1>
+<MvAssign name="l.toAppend" value="APPENDED 1! " />
+<MvIf expr="{redis_error(l.lastRedisError)}"><h1 style="color: red"><MvEval expr="{l.lastRedisError}" /></h1></MvIf>
+
+<h1>APPEND: <MvEval expr="{miva_array_serialize(redis_append(l.key, l.toAppend))}" /></h1>
+<MvAssign name="l.toAppend" value="APPENDED 2! " />
+<MvIf expr="{redis_error(l.lastRedisError)}"><h1 style="color: red"><MvEval expr="{l.lastRedisError}" /></h1></MvIf>
+
+<h1>APPEND: <MvEval expr="{miva_array_serialize(redis_append(l.key, l.toAppend))}" /></h1>
+<MvAssign name="l.toAppend" value="APPENDED 3! " />
+<MvIf expr="{redis_error(l.lastRedisError)}"><h1 style="color: red"><MvEval expr="{l.lastRedisError}" /></h1></MvIf>
+
+<h1>APPEND: <MvEval expr="{miva_array_serialize(redis_append(l.key, l.toAppend))}" /></h1>
+<MvAssign name="l.toAppend" value="APPENDED 4! " />
+<MvIf expr="{redis_error(l.lastRedisError)}"><h1 style="color: red"><MvEval expr="{l.lastRedisError}" /></h1></MvIf>
+
+<h1>GET: <MvEval expr="{miva_array_serialize(redis_command('GET THEKEYTHING', ''))}" /></h1>
+<MvIf expr="{redis_error(l.lastRedisError)}"><h1 style="color: red"><MvEval expr="{l.lastRedisError}" /></h1></MvIf>
+
+<MvAssign name="l._" value="{redis_command_append('SET key1 value1', '')}" />
+<MvAssign name="l._" value="{redis_command_append('SET key2 value2', '')}" />
+<MvAssign name="l._" value="{redis_command_append('GET key1', '')}" />
+
+<ul>
+    <MvWhile expr="{redis_get_reply(l.reply)}">
+        <li>
+            {<MvEval expr="{miva_array_serialize(l.reply)}" />}
+            <MvIf expr="{redis_error(l.lastRedisError)}"><h1 style="color: red"><MvEval expr="{l.lastRedisError}" /></h1></MvIf>
+        </li>
+    </MvWhile>
+</ul>
 
 <MvAssign name="l.ret" value="{redis_free()}" />
 <MvEval expr="{l.ret}" /> <br />
+END
