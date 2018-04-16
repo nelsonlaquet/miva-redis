@@ -2,6 +2,7 @@
 #include <string>
 #include <string.h>
 #include <vector>
+#include <stdio.h>
 
 #include "miva-redis.h"
 
@@ -169,7 +170,7 @@ extern "C" {
 			setRedisError(ERROR_CONNECT_ERROR, _connection->errstr, program, returnValue);
 			return;
 		}
-
+ 
 		mvVariable_SetValue_Integer(returnValue, 1);
 	}
 
@@ -468,7 +469,7 @@ extern "C" {
 
 		int expires = mvVariable_Value_Integer(mvVariableHash_Index(parameters, 2));
 
-		redisReply* reply = (redisReply*)redisCommand(_connection, "SETEX %s %s %s", key, value, expires);
+		redisReply* reply = (redisReply*)redisCommand(_connection, "SETEX %s %d %s", key, expires, value);
 
 		if (reply == NULL) {
 			setRedisError(ERROR_COMMAND, _connection->errstr, program, returnValue);
@@ -496,12 +497,12 @@ extern "C" {
 			{ "redis_command", 13, 2, redis_command_parameters, redis_command },
 			{ "redis_command_append", 20, 2, redis_command_append_parameters, redis_command_append },
 			{ "redis_error", 11, 1, redis_error_parameters, redis_error },
-			{ "redis_error_clear", 17, 1, redis_error_clear_parameters, redis_error_clear },
+			{ "redis_error_clear", 17, 0, redis_error_clear_parameters, redis_error_clear },
 			{ "redis_get_reply", 15, 1, redis_get_reply_parameters, redis_get_reply },
 
 			{ "redis_get", 9, 2, redis_get_parameters, redis_get},
 			{ "redis_set", 9, 2, redis_set_parameters, redis_set},
-			{ "redis_setex", 9, 3, redis_setex_parameters, redis_setex},
+			{ "redis_setex", 11, 3, redis_setex_parameters, redis_setex},
 			{ "redis_del", 9, 1, redis_del_parameters, redis_del},
 			{ "redis_append", 12, 2, redis_append_parameters, redis_append},
 

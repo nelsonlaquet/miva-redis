@@ -13,6 +13,8 @@
 <MvAssign name="l.startingValue" value="he234y" />
 <h1>SET: <MvEval expr="{miva_array_serialize(redis_set(l.key, l.startingValue))}" /></h1>
 
+<h1>SETEX: <MvEval expr="{miva_array_serialize(redis_setex(l.key, l.startingValue, 100))}" /></h1>
+
 <h1>GET: <MvEval expr="{miva_array_serialize(redis_get(l.key, l.gottenValue))}" /></h1>
 <h2>GOTTEN VALUE: <MvEval expr="{l.gottenValue}" /></h2>
 

@@ -1,7 +1,10 @@
-FROM node:9.8
+FROM nginx:1.13
 
 RUN apt-get update && \
-	apt-get install -y htop vim
+	apt-get install -y htop vim curl gnupg2 && \
+	curl -sL https://deb.nodesource.com/setup_9.x | bash - && \
+	apt-get install -y nodejs && \
+	npm install -g yarn
 
 COPY bin/dumb-init_1.2.0_amd64 /dumb-init
 RUN chmod +x /dumb-init
