@@ -1,8 +1,17 @@
+<MvAssign name="l.fieldPrefix" value="stuff" />
+<MvReference name="l.data" variable="{'g.' $ l.fieldPrefix}" />
+
+<h2><MvEval expr="{miva_array_serialize(l.data)}" /></h2>
+
 <h1>Redis Test</h1>
-<MvAssign name="l.ret" value="{redis_connect('redis', 6379)}" />
+<MvAssign name="l.ret" value="{redis_is_enabled()}" />
 <MvEval expr="{l.ret}" /> <br />
 
 <MvAssign name="l.key" value="THEKEYTHING" />
+
+<h1><MvEval expr="{redis_command('INCR thisisatestkey', '')}" /></h1>
+
+<h1><MvEval expr="{miva_array_serialize(redis_command('GET notexist', ''))}" /></h1>
 
 <h1>TEST GET: <MvEval expr="{miva_array_serialize(redis_get('DOESNTEXIST', l.blugh))}" /></h1>
 <h1>TEST GET CMD: <MvEval expr="{miva_array_serialize(redis_command('GET DOESNTEXIST', ''))}" /></h1>

@@ -3,6 +3,7 @@
 #include <string.h>
 #include <vector>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "miva-redis.h"
 
@@ -15,12 +16,20 @@ const int ERROR_CONNECT_ERROR = 2;
 const int ERROR_NOT_CONNECTED = 3;
 const int ERROR_MALFORMED_COMMAND = 4;
 const int ERROR_COMMAND = 5;
+const int ERROR_REDIS_CONFIG_NOT_FOUND = 6;
+const int ERROR_REDIS_CONFIG_INVALID = 7;
 
 const char* getVariableFromLists(mvVariableList localVars, mvVariableList globalVars, const string& variableName);
 
 extern "C" {
 	#include "../vendor/hiredis/hiredis.h"
 	#include "../vendor/hiredis/sds.h"
+
+	enum RedisStatus {
+		RedisStatus_Disabled,
+		RedisStatus_Enabled,
+		RedisStatus_Unknown
+	};
 
 	/**
 	* Globals
@@ -29,6 +38,8 @@ extern "C" {
 	string _lastRedisError;
 	int _lastRedisErrorCode = 0;
 	int _redisAppendStackSize = 0;
+
+	RedisStatus _status = RedisStatus_Unknown;
 
 	/**
 	* Helpers
@@ -91,6 +102,13 @@ extern "C" {
 			stringstream ss;
 			ss << "Redis command '" << command << "' has " << variableSubCount << " variable substitutions, but you provided " << varNameCount << " variables!";
 			setRedisError(ERROR_MALFORMED_COMMAND, ss.str(), program, returnValue);
+
+			for (int i = 0; i < commandPartCount; i++)
+				sdsfree(commandParts[i]);
+
+			for (int i = 0; i < varNameCount; i++)
+				sdsfree(varNames[i]);
+
 			return false;
 		}
 
@@ -116,6 +134,69 @@ extern "C" {
 		mvVariableList_Free(globalVars);
 
 		return true;
+	}
+
+	bool isRedisEnabled(mvProgram program, mvVariable returnValue) {
+		if (_status == RedisStatus_Unknown) {
+			mvFile redisConfigFile = mvFile_Open(program, MVF_DATA, "redis.dat", 9, MVF_MODE_READ);
+
+			if (redisConfigFile == 0) {
+				// file not found
+				setRedisError(ERROR_REDIS_CONFIG_NOT_FOUND, "redis.dat config file not found!", program, returnValue);
+				_status = RedisStatus_Disabled;
+				return false;
+			}
+
+			long fileLength = mvFile_Length(redisConfigFile);
+			char* buffer = new char[fileLength];
+			mvFile_Read(redisConfigFile, buffer, fileLength);
+
+			int configPartCount;
+			sds* configParts = sdssplitlen(buffer, fileLength, ":", 1, &configPartCount);
+
+			if (configPartCount != 2 && configPartCount != 3) {
+				setRedisError(ERROR_REDIS_CONFIG_INVALID, "Invalid redis.dat config file!", program, returnValue);
+				_status = RedisStatus_Disabled;
+				return false;
+			}
+
+			const char* host = configParts[0];
+			int port = atoi(configParts[1]);
+
+			int databaseIndex = 0;
+			if (configPartCount == 3)
+				databaseIndex = atoi(configParts[2]);
+
+			_connection = redisConnect(host, port);
+			if (_connection != NULL && _connection->err) {
+				setRedisError(ERROR_CONNECT_ERROR, _connection->errstr, program, returnValue);
+				_status = RedisStatus_Disabled;
+				return false;
+			}
+
+			if (databaseIndex != 0)
+				redisCommand(_connection, "SELECT %d", databaseIndex);
+			
+			for (int i = 0; i < configPartCount; i++)
+				sdsfree(configParts[i]);
+
+			delete [] buffer;
+			_status = RedisStatus_Enabled;
+		}
+		
+		return _status == RedisStatus_Enabled;
+	}
+
+	/**
+	 * -----------------------------------------
+	 * redis_is_enabled
+	 * -----------------------------------------
+	 */
+	MV_EL_FunctionParameter redis_is_enabled_parameters[] = {
+		{ }
+	};
+	void redis_is_enabled(mvProgram program, mvVariableHash parameters, mvVariable returnValue, void** pdata) {
+		mvVariable_SetValue_Integer(returnValue, isRedisEnabled(program, returnValue));
 	}
 
 	/**
@@ -148,40 +229,17 @@ extern "C" {
 
 	/**
 	 * -----------------------------------------
-	 * redis_connect
-	 * -----------------------------------------
-	 */
-	MV_EL_FunctionParameter redis_connect_parameters[] = {
-		{ "host", 4, EPF_NORMAL },
-		{ "port", 4, EPF_NORMAL }
-	};
-	void redis_connect(mvProgram program, mvVariableHash parameters, mvVariable returnValue, void** pdata)  {
-		if (_connection != NULL) {
-			setRedisError(ERROR_ALREADY_CONNECTED, "You are already connected!", program, returnValue);
-			return;
-		}
-		
-		int hostLength = 0;
-		const char* host = mvVariable_Value(mvVariableHash_Index(parameters, 0), &hostLength);
-		int port = mvVariable_Value_Integer(mvVariableHash_Index(parameters, 1));
-
-		_connection = redisConnect(host, port);
-		if (_connection != NULL && _connection->err) {
-			setRedisError(ERROR_CONNECT_ERROR, _connection->errstr, program, returnValue);
-			return;
-		}
- 
-		mvVariable_SetValue_Integer(returnValue, 1);
-	}
-
-	/**
-	 * -----------------------------------------
 	 * redis_free
 	 * -----------------------------------------
 	 */
 	MV_EL_FunctionParameter redis_free_parameters[] = {
 	};
 	void redis_free(mvProgram program, mvVariableHash parameters, mvVariable returnValue, void** pdata)  {
+		if (!isRedisEnabled(program, returnValue)) {
+			mvVariable_SetValue_Integer(returnValue, 0);	
+			return;
+		}
+		
 		if (_connection != NULL) {
 			redisFree(_connection);		
 			_connection = NULL;
@@ -200,6 +258,11 @@ extern "C" {
 		{ "args", 4, EPF_NORMAL }
 	};
 	void redis_command(mvProgram program, mvVariableHash parameters, mvVariable returnValue, void** pdata) {
+		if (!isRedisEnabled(program, returnValue)) {
+			mvVariable_SetValue_Integer(returnValue, 0);	
+			return;
+		}
+		
 		if (_connection == NULL) {
 			setRedisError(ERROR_NOT_CONNECTED, "Not connected! Use redis_connect!", program, returnValue);
 			return;
@@ -249,6 +312,11 @@ extern "C" {
 		{ "args", 4, EPF_NORMAL }
 	};
 	void redis_command_append(mvProgram program, mvVariableHash parameters, mvVariable returnValue, void** pdata) {
+		if (!isRedisEnabled(program, returnValue)) {
+			mvVariable_SetValue_Integer(returnValue, 0);	
+			return;
+		}
+		
 		if (_connection == NULL) {
 			setRedisError(ERROR_NOT_CONNECTED, "Not connected! Use redis_connect!", program, returnValue);
 			return;
@@ -279,6 +347,11 @@ extern "C" {
 		{ "reply", 5, EPF_REFERENCE }
 	};
 	void redis_get_reply(mvProgram program, mvVariableHash parameters, mvVariable returnValue, void** pdata) {
+		if (!isRedisEnabled(program, returnValue)) {
+			mvVariable_SetValue_Integer(returnValue, 0);	
+			return;
+		}
+		
 		if (_connection == NULL) {
 			setRedisError(ERROR_NOT_CONNECTED, "Not connected! Use redis_connect!", program, returnValue);
 			return;
@@ -312,6 +385,11 @@ extern "C" {
 	 */
 	MV_EL_FunctionParameter redis_get_parameters[] = { { "key", 3, EPF_NORMAL }, { "ret", 3, EPF_REFERENCE } };
 	void redis_get(mvProgram program, mvVariableHash parameters, mvVariable returnValue, void** pdata) {
+		if (!isRedisEnabled(program, returnValue)) {
+			mvVariable_SetValue_Integer(returnValue, 0);	
+			return;
+		}
+		
 		if (_connection == NULL) {
 			setRedisError(ERROR_NOT_CONNECTED, "Not connected! Use redis_connect!", program, returnValue);
 			return;
@@ -343,9 +421,14 @@ extern "C" {
 			return;
 		}
 
-		mvVariable_SetValue(mvVariableHash_Index(parameters, 1), reply->str, reply->len);
+		if (reply->type == REDIS_REPLY_STRING) {
+			mvVariable_SetValue(mvVariableHash_Index(parameters, 1), reply->str, reply->len);
+			mvVariable_SetValue_Integer(returnValue, 1);
+		} else {
+			mvVariable_SetValue_Integer(returnValue, -1);
+		}
+		
 		freeReplyObject(reply);
-		mvVariable_SetValue_Integer(returnValue, 1);
 	}
 	
 	/**
@@ -355,6 +438,11 @@ extern "C" {
 	 */
 	MV_EL_FunctionParameter redis_del_parameters[] = { { "key", 3, EPF_NORMAL } };
 	void redis_del(mvProgram program, mvVariableHash parameters, mvVariable returnValue, void** pdata) {
+		if (!isRedisEnabled(program, returnValue)) {
+			mvVariable_SetValue_Integer(returnValue, 0);	
+			return;
+		}
+		
 		if (_connection == NULL) {
 			setRedisError(ERROR_NOT_CONNECTED, "Not connected! Use redis_connect!", program, returnValue);
 			return;
@@ -386,6 +474,11 @@ extern "C" {
 	 */
 	MV_EL_FunctionParameter redis_set_parameters[] = { { "key", 3, EPF_NORMAL }, { "value", 5, EPF_REFERENCE } };
 	void redis_set(mvProgram program, mvVariableHash parameters, mvVariable returnValue, void** pdata) {
+		if (!isRedisEnabled(program, returnValue)) {
+			mvVariable_SetValue_Integer(returnValue, 0);	
+			return;
+		}
+		
 		if (_connection == NULL) {
 			setRedisError(ERROR_NOT_CONNECTED, "Not connected! Use redis_connect!", program, returnValue);
 			return;
@@ -421,6 +514,11 @@ extern "C" {
 	 */
 	MV_EL_FunctionParameter redis_append_parameters[] = { { "key", 3, EPF_NORMAL }, { "value", 5, EPF_REFERENCE } };
 	void redis_append(mvProgram program, mvVariableHash parameters, mvVariable returnValue, void** pdata) {
+		if (!isRedisEnabled(program, returnValue)) {
+			mvVariable_SetValue_Integer(returnValue, 0);	
+			return;
+		}
+		
 		if (_connection == NULL) {
 			setRedisError(ERROR_NOT_CONNECTED, "Not connected! Use redis_connect!", program, returnValue);
 			return;
@@ -456,6 +554,11 @@ extern "C" {
 	 */
 	MV_EL_FunctionParameter redis_setex_parameters[] = { { "key", 3, EPF_NORMAL }, { "value", 5, EPF_REFERENCE }, { "expires", 7, EPF_NORMAL } };
 	void redis_setex(mvProgram program, mvVariableHash parameters, mvVariable returnValue, void** pdata) {
+		if (!isRedisEnabled(program, returnValue)) {
+			mvVariable_SetValue_Integer(returnValue, 0);	
+			return;
+		}
+		
 		if (_connection == NULL) {
 			setRedisError(ERROR_NOT_CONNECTED, "Not connected! Use redis_connect!", program, returnValue);
 			return;
@@ -492,7 +595,8 @@ extern "C" {
 	 */
 	EXPORT MV_EL_Function_List* miva_function_table() {
 		static MV_EL_Function exported_functions[] = {
-			{ "redis_connect", 13, 2, redis_connect_parameters, redis_connect },
+			{ "redis_is_enabled", 16, 0, redis_is_enabled_parameters, redis_is_enabled },
+
 			{ "redis_free", 10, 0, redis_free_parameters, redis_free },
 			{ "redis_command", 13, 2, redis_command_parameters, redis_command },
 			{ "redis_command_append", 20, 2, redis_command_append_parameters, redis_command_append },
