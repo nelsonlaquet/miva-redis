@@ -60,7 +60,7 @@ Clears the last redis error.
 ### `int redis_free()`
 Disconnects from redis. Returns `1` on success, `0` on failure. Note that you *shouldn't* have to call this function. I don't know why I made it.
 
-### `int redis_get_reply(reply var)`
+### `int redis_get_reply(redis_reply* reply)`
 See https://github.com/redis/hiredis#pipelining
 
 ### `int redis_is_enabled()`
@@ -74,6 +74,7 @@ If a redis connection has been attempted, returns `1` or `0` depending on if the
 Wrapper around [APPEND](https://redis.io/commands/append).
 
 **key**: the key to append to.
+
 **value**: a reference to the string to append.
 
 Returns `0` on error, `1` on success.
@@ -89,6 +90,7 @@ Returns `0` on error, `1` on success.
 Wrapper around [GET](https://redis.io/commands/get).
 
 **key**: the key to get.
+
 **ret**: the value of the key will be placed in this variable.
 
 Returns `0` on error, `-1` if the key was not found, and `1` if the key was found.
@@ -97,6 +99,7 @@ Returns `0` on error, `-1` if the key was not found, and `1` if the key was foun
 Wrapper around [SET](https://redis.io/commands/set).
 
 **key**: the key to set.
+
 **value**: a reference to the string to set the key to.
 
 Returns `0` on error, `1` on success.
@@ -105,5 +108,7 @@ Returns `0` on error, `1` on success.
 Wrapper around [SETEX](https://redis.io/commands/setex).
 
 **key**: the key to set.
+
 **value**: a reference to the string to set the key to.
+
 **expires**: the expiration of the key in seconds.
