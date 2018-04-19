@@ -53,9 +53,9 @@ extern "C" {
 			mvVariable stringVar = mvVariable_Allocate("string", 6, reply->str, reply->len);
 			mvVariable_Set_Struct_Member("string", 6, stringVar, outputVar);
 		} else if (reply->type == REDIS_REPLY_INTEGER) {
-			mvVariable intVar = mvVariable_Allocate("string", 6, reply->str, reply->len);
+			mvVariable intVar = mvVariable_Allocate("int", 3, reply->str, reply->len);
 			mvVariable_SetValue_Integer(intVar, reply->integer);
-			mvVariable_Set_Struct_Member("string", 6, intVar, outputVar);			
+			mvVariable_Set_Struct_Member("int", 3, intVar, outputVar);			
 		} else if (reply->type == REDIS_REPLY_ARRAY) {
 			const char* varName = "redisreply";
 			for (int i = 0; i < reply->elements; i++) {
