@@ -167,7 +167,8 @@ extern "C" {
 			if (configPartCount == 3)
 				databaseIndex = atoi(configParts[2]);
 
-			_connection = redisConnect(host, port);
+			timeval timeout = { 0, 500000 };
+			_connection = redisConnectWithTimeout(host, port, timeout);
 			if (_connection != NULL && _connection->err) {
 				setRedisError(ERROR_CONNECT_ERROR, _connection->errstr, program, returnValue);
 				_status = RedisStatus_Disabled;
