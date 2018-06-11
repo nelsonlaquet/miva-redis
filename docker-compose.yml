@@ -4,7 +4,6 @@ services:
     build:
       context: .
       dockerfile: ./containers/cpp-compiler/Dockerfile
-    restart: always
     volumes:
       - ./src:/packages/miva-redis
       - ./data/builtins:/data/builtins
@@ -23,7 +22,6 @@ services:
     build:
       context: .
       dockerfile: ./containers/miva-empresa/Dockerfile
-    restart: always
     ports:
       - "8080:80"
     volumes:
@@ -36,6 +34,5 @@ services:
     build:
       context: .
       dockerfile: ./containers/redis/Dockerfile
-    restart: always
     ports:
       - "6379:6379"
