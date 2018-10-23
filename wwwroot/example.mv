@@ -6,6 +6,8 @@
 <h1>Redis Test</h1>
 <MvAssign name="l.ret" value="{redis_is_enabled()}" />
 <MvEval expr="{l.ret}" /> <br />
+<h1>HEY: <MvEval expr="{miva_array_serialize(redis_command('SET MessageQueue:Lock2 "test" NX EX 5', ''))}" /></h1>
+<MvIf expr="{redis_error(l.lastRedisError)}"><h1 style="color: red"><MvEval expr="{l.lastRedisError}" /></h1></MvIf>
 
 <MvAssign name="l.key" value="THEKEYTHING" />
 
